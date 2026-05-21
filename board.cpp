@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <ctime>
 
 #include "board.h"
 #include "pawn.h"
@@ -1053,6 +1054,7 @@ void Board::gameLoopPvP() {
 
         string from, to;
         cout << "Введите ход: ";
+        time_t startTime = time(0);
         cin >> from >> to;
 
         if (from == "save") {
@@ -1065,9 +1067,29 @@ void Board::gameLoopPvP() {
             continue;
         }
 
+        if (from == "save" || from == "load") startTime = time(0);
+
         if (!movePiece(from, to)) {
             cout << "Неверный ход!\n";
             continue;
+        }
+
+        time_t endTime = time(0);
+
+        int spent = static_cast<int>(endTime - startTime);
+
+        if (!whiteTurn) whiteTime -= spent;
+        else blackTime -= spent;
+
+        if (whiteTime <= 0) {
+            print();
+            cout << "\nБелые проиграли по времени!\n";
+            break;
+        }
+        if (blackTime <= 0) {
+            print();
+            cout << "\nЧерные проиграли по времени!\n";
+            break;
         }
 
         if (isCheckmate(whiteTurn)) {
